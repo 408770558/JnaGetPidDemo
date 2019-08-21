@@ -18,7 +18,8 @@ public class RunUtils {
      * 运行代码有两种方式，一种是通过反射动态运行，一种是另起进程，这里选择另起进程
      */
     public static void run(String cmd) {
-        long pid;
+        //执行失败返回-1
+        long pid = -1;
         try {
 
             Process child = Runtime.getRuntime().exec(cmd);
@@ -33,6 +34,8 @@ public class RunUtils {
             messageMap.put(SpiderConstant.SPIDER_KEYWORD_PROCESSMAP_RUNSTATUS, 0);
         } catch (Exception e) {
             e.printStackTrace();
+
+            messageMap.put(SpiderConstant.SPIDER_KEYWORD_PROCESSMAP_PID, pid);
         }
     }
 

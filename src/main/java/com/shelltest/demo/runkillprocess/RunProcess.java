@@ -1,6 +1,9 @@
 package com.shelltest.demo.runkillprocess;
 
 import com.shelltest.demo.utils.RunUtils;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 
@@ -9,12 +12,16 @@ import java.util.Arrays;
  *
  * @author 18671
  */
+@RestController
+@Log4j2
 public class RunProcess {
-    public static void main(String[] args) {
+
+    @GetMapping("sleepPid")
+    public long sleepPid() {
         // 执行无阻塞调用
         long pid = runJavaProcess();
 
-        System.out.println(pid);
+        log.info("-----------" + pid);
 
         //十秒后杀掉进程
         try {
@@ -23,12 +30,15 @@ public class RunProcess {
             e.printStackTrace();
         }
 
-        stopProcess(pid);
+        //stopProcess(pid);
+
+        return pid;
     }
 
     private static long runJavaProcess() {
         //String cmd = "java -cp D:\\example.JavaProcess1";
-        String cmd = "\"D:\\notepad\\Notepad++\\notepad++.exe\" D:\\1.txt";
+        //String cmd = "\"D:\\notepad\\Notepad++\\notepad++.exe\" D:\\1.txt";
+        String cmd = "vim /opt/sssss/xx.xx";
 
         RunUtils.run(cmd);
 
