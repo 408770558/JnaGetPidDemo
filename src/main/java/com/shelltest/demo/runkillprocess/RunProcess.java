@@ -16,6 +16,11 @@ import java.util.Arrays;
 @Log4j2
 public class RunProcess {
 
+    /**
+     * http://localhost:8080/sleepPid?command=vi%20/opt/1.txt
+     * @param command
+     * @return
+     */
     @GetMapping("sleepPid")
     public long sleepPid(String command) {
         // 执行无阻塞调用
@@ -23,7 +28,7 @@ public class RunProcess {
 
         log.info("-----------" + pid);
 
-        //十秒后杀掉进程
+        //30秒后杀掉进程
         try {
             Thread.sleep(1000 * 30);
         } catch (InterruptedException e) {

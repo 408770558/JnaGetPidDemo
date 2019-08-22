@@ -19,8 +19,8 @@ import java.util.Arrays;
 public class getPid {
 
     /**
-     * 获取Linux进程的PID
-     *
+     * 获取进程的PID
+     * http://localhost:8080/getPid?commandOrPid=12797
      * @param commandOrPid
      * @return
      */
