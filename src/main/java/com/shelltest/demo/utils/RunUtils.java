@@ -24,7 +24,7 @@ public class RunUtils {
 
             Process child = Runtime.getRuntime().exec(cmd);
 
-            messageMap.put(SpiderConstant.SPIDER_KEYWORD_PROCESSMAP_PROCESS, child);
+            //messageMap.put(SpiderConstant.SPIDER_KEYWORD_PROCESSMAP_PROCESS, child);
 
             pid = getProcessPID(child);
 

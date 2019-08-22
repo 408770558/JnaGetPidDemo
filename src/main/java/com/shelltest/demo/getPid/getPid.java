@@ -21,13 +21,13 @@ public class getPid {
     /**
      * 获取Linux进程的PID
      *
-     * @param command
+     * @param commandOrPid
      * @return
      */
     @GetMapping("getPid")
-    public boolean getPid(String command) {
+    public boolean getPid(String commandOrPid) {
 
-        log.info("command ------> " + command);
+        log.info("commandOrPid ------> " + commandOrPid);
 
         BufferedReader reader = null;
         try {
@@ -41,8 +41,8 @@ public class getPid {
 
                 log.info("进程信息 -----> " + line);
 
-                if (line.contains(command)) {
-                    log.info("相关信息 ---------------> " + command);
+                if (line.contains(commandOrPid)) {
+                    log.info("相关信息 ---------------> " + commandOrPid);
                     strs = line.split("\\s+");
                 }
             }

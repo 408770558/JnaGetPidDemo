@@ -17,30 +17,30 @@ import java.util.Arrays;
 public class RunProcess {
 
     @GetMapping("sleepPid")
-    public long sleepPid() {
+    public long sleepPid(String command) {
         // 执行无阻塞调用
-        long pid = runJavaProcess();
+        long pid = runJavaProcess(command);
 
         log.info("-----------" + pid);
 
         //十秒后杀掉进程
         try {
-            Thread.sleep(1000 * 60);
+            Thread.sleep(1000 * 30);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        //stopProcess(pid);
+        stopProcess(pid);
 
         return pid;
     }
 
-    private static long runJavaProcess() {
+    private static long runJavaProcess(String command) {
         //String cmd = "java -cp D:\\example.JavaProcess1";
         //String cmd = "\"D:\\notepad\\Notepad++\\notepad++.exe\" D:\\1.txt";
-        String cmd = "vim /opt/sssss/xx.xx";
+        //String cmd = "vim /opt/sssss/xx.xx";
 
-        RunUtils.run(cmd);
+        RunUtils.run(command);
 
         // 获取pid
         return (long) RunUtils.messageMap.get("pid");
@@ -48,7 +48,8 @@ public class RunProcess {
 
     private static void stopProcess(long pid) {
         // 拼接命令
-        String cmd = "taskkill /PID " + pid + " /F";
+        //String cmd = "taskkill /PID " + pid + " /F";
+        String cmd = "kiil -9" + pid;
         // 运行命令
         String[] returnContent = RunUtils.run2(cmd);
 
