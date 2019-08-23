@@ -5,6 +5,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Bowen.Li@onerway.com
  * @date 2019/8/22
@@ -16,7 +19,7 @@ public class ConnectLinuxCommand {
 
 
     /**
-     * localhost:8080/ssh2?ip=192.168.91.3&userName=root&password=admin123&cmd=vi /opt/1.txt
+     * http://localhost:8080/ssh2?ip=192.168.91.3&userName=root&password=admin123&cmd=cd%20/opt&cmd=java%20-jar%20demo-0.0.1-SNAPSHOT.jar
      *
      * @throws
      * @Title: login
@@ -39,10 +42,16 @@ public class ConnectLinuxCommand {
      * @return: Boolean
      */
     @GetMapping("ssh3")
-    public boolean query(String ip, String userName, String password, int pid) {
+    public String query(String ip, String userName, String password, int pid) {
 
         PidUtils pidUtils = new PidUtils();
 
-        return pidUtils.isExistPid(ip, userName, password, pid);
+        List<Integer> list = new ArrayList<>();
+        list.add(pid);
+        list.add(7070);
+        list.add(8080);
+        list.add(9090);
+        list.add(1010);
+        return pidUtils.isExistPid(ip, userName, password, list).toString();
     }
 }

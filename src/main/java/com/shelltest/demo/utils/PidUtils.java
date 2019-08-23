@@ -4,6 +4,7 @@ import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
 import ch.ethz.ssh2.StreamGobbler;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
@@ -11,7 +12,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Bowen.Li@onerway.com
@@ -101,23 +104,23 @@ public class PidUtils {
      * @param ip       服务器ip
      * @param userName 服务器账号
      * @param password 服务器密码
-     * @param pid      pid进程
-     * @return true进程运行中， false未查询到进程
+     * @param pids     pid进程
+     * @return true进程运行中， false未查询到进程, 空集合查询失败
      */
-    public boolean isExistPid(String ip, String userName, String password, int pid) {
+    public List<Map<Integer, Boolean>> isExistPid(String ip, String userName, String password, List<Integer> pids) {
         Connection conn = setConnection(ip, userName, password);
         if (conn != null) {
             try {
                 //打开查询连接
                 Session querySession = conn.openSession();
-                return runQuerySession(querySession, pid);
+                return runQuerySession(querySession, pids);
             } catch (Exception e) {
                 System.out.println("查询失败");
             } finally {
                 conn.close();
             }
         }
-        return false;
+        return new ArrayList<>();
     }
 
 
@@ -183,15 +186,14 @@ public class PidUtils {
         return result;
     }
 
-    private boolean runQuerySession(Session session, int pid) {
-        List<String> list = getConnReturn(session);
-        int result = intCheckPid(list, null, pid, false);
-        return result > 0;
-    }
-
     private int runQuerySession(Session session, String lastCmd) {
         List<String> list = getConnReturn(session);
-        return intCheckPid(list, lastCmd, null, true);
+        return initCheckPid(list, lastCmd);
+    }
+
+    private List<Map<Integer, Boolean>> runQuerySession(Session session, List<Integer> pids) {
+        List<String> list = getConnReturn(session);
+        return initCheckPid(list, pids);
     }
 
     private List<String> getConnReturn(Session session) {
@@ -202,13 +204,14 @@ public class PidUtils {
             return list;
         }
 
+        InputStream stdout = null;
+
         try {
             session.execCommand("ps -eo pid,cmd");
 
             //获取返回输出
-            InputStream stdout = new StreamGobbler(session.getStdout());
+            stdout = new StreamGobbler(session.getStdout());
             BufferedReader stdoutReader = new BufferedReader(new InputStreamReader(stdout));
-
 
             String line;
             while ((line = stdoutReader.readLine()) != null) {
@@ -217,32 +220,65 @@ public class PidUtils {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
+
+            try {
+                if (stdout != null) {
+                    stdout.close();
+                }
+            } catch (IOException e) {
+                System.out.println("返回信息关闭失败");
+                e.printStackTrace();
+            }
             session.close();
+        }
+
+        if (list.size() > 0) {
+            list.remove(0);
         }
         return list;
     }
 
-    private int intCheckPid(List<String> list, String lastCmd, Integer pid, boolean flag) {
+    private int initCheckPid(List<String> list, String lastCmd) {
         for (String s : list) {
             String str = trimInnerSpaceStr(s);
             int i = str.indexOf(" ");
 
-            //第1列为pid
-            if (flag) {
-
-                String comm = str.substring(i);
-                if (comm.trim().equals(lastCmd)) {
-                    return Integer.valueOf(str.substring(0, i));
-                }
-            } else {
-
-                String comm = str.substring(0, i);
-                if (comm.trim().equals(String.valueOf(pid))) {
-                    return pid;
-                }
+            String comm = str.substring(i);
+            if (comm.trim().equals(lastCmd)) {
+                return Integer.valueOf(str.substring(0, i));
             }
         }
         return resultError;
+    }
+
+    private List<Map<Integer, Boolean>> initCheckPid(List<String> list, List<Integer> pids) {
+
+        if (CollectionUtils.isEmpty(pids)) {
+            return new ArrayList<>();
+        }
+
+        List<Map<Integer, Boolean>> resultList = new ArrayList<>(pids.size());
+        for (Integer pid : pids) {
+
+            Map<Integer, Boolean> resultMap = new HashMap<>(1);
+            //默认不存在
+            resultMap.put(pid, false);
+
+            for (String s : list) {
+                String str = trimInnerSpaceStr(s);
+                int i = str.indexOf(" ");
+
+                //系统pid
+                Integer sysPid = Integer.valueOf(str.substring(0, i).trim());
+                if (sysPid.equals(pid)) {
+                    //查询到修改为成功
+                    resultMap.put(pid, true);
+                }
+            }
+
+            resultList.add(resultMap);
+        }
+        return resultList;
     }
 
     /**
